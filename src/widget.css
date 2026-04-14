@@ -1,0 +1,456 @@
+:root {
+  color-scheme: dark;
+  --gaze-x: 0px;
+  --gaze-y: 0px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: transparent;
+}
+
+body {
+  font-family: "Segoe UI Variable", "Segoe UI", sans-serif;
+  color: #eaf8ff;
+  user-select: none;
+}
+
+.widget-app {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 4px 8px 8px;
+}
+
+.widget-drag-zone {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 4px;
+  height: 28px;
+  -webkit-app-region: drag;
+}
+
+.widget-shell-button,
+.widget-action {
+  -webkit-app-region: no-drag;
+}
+
+.widget-bubble {
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  z-index: 3;
+  max-width: min(170px, 68vw);
+  padding: 6px 10px;
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(9, 24, 16, 0.92), rgba(4, 13, 10, 0.9)),
+    radial-gradient(circle at 50% 0, rgba(133, 255, 173, 0.22), transparent 64%);
+  border: 1px solid rgba(132, 255, 175, 0.18);
+  box-shadow:
+    0 10px 26px rgba(2, 8, 16, 0.34),
+    inset 0 0 0 1px rgba(170, 255, 194, 0.05);
+  color: #e7ffed;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-align: center;
+  transform: translateX(-50%) translateY(0);
+  opacity: 0;
+  transition: opacity 180ms ease, transform 180ms ease;
+  pointer-events: none;
+}
+
+.widget-bubble.is-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(2px);
+}
+
+.widget-shell-button {
+  position: absolute;
+  left: 50%;
+  bottom: -18px;
+  width: min(250px, calc(100vw - 150px));
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transform: translateX(-50%) translateY(18px) scale(0.58);
+  transform-origin: bottom center;
+  transition: transform 240ms ease, filter 220ms ease;
+}
+
+body[data-shell-mode="active"] .widget-shell-button {
+  transform: translateX(-50%) translateY(2px) scale(0.44);
+}
+
+body[data-expression="sleeping"] .widget-shell-button {
+  transform: translateX(-50%) translateY(16px) scale(0.5);
+}
+
+.widget-shell-image {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  height: auto;
+  filter:
+    drop-shadow(0 18px 28px rgba(0, 0, 0, 0.42))
+    drop-shadow(0 0 18px rgba(80, 255, 146, 0.1));
+}
+
+body[data-shell-mode="active"] .widget-shell-image {
+  filter:
+    drop-shadow(0 20px 30px rgba(0, 0, 0, 0.42))
+    drop-shadow(0 0 24px rgba(83, 255, 140, 0.18));
+}
+
+.widget-glow {
+  position: absolute;
+  bottom: 30%;
+  width: 18%;
+  height: 10%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(72, 255, 133, 0.52), rgba(72, 255, 133, 0) 72%);
+  filter: blur(18px);
+  z-index: 1;
+  animation: widgetAuraPulse 5.5s ease-in-out infinite;
+}
+
+.widget-glow-left {
+  left: 31%;
+}
+
+.widget-glow-right {
+  right: 31%;
+  animation-delay: 0.8s;
+}
+
+.widget-visor {
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  z-index: 3;
+  width: 34%;
+  height: 14%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  pointer-events: none;
+}
+
+.widget-core-glow {
+  position: absolute;
+  inset: 10% 8%;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle, rgba(74, 255, 130, 0.12), transparent 68%),
+    radial-gradient(circle at 50% 30%, rgba(220, 255, 228, 0.12), transparent 54%);
+  filter: blur(8px);
+  animation: visorBloom 4.4s ease-in-out infinite;
+}
+
+.widget-eye {
+  --eye-width: 26px;
+  --eye-height: 26px;
+  --eye-rotate: 0deg;
+  --eye-shift-x: 0px;
+  --eye-shift-y: 0px;
+  --eye-scale-x: 1;
+  --eye-scale-y: 1;
+  position: relative;
+  z-index: 2;
+  width: var(--eye-width);
+  height: var(--eye-height);
+  border: 1px solid rgba(223, 255, 231, 0.76);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(224, 255, 232, 0.98), rgba(114, 255, 152, 0.96) 28%, rgba(32, 230, 93, 0.96) 62%, rgba(8, 112, 44, 0.98) 100%);
+  box-shadow:
+    0 0 12px rgba(120, 255, 167, 0.88),
+    0 0 22px rgba(67, 255, 126, 0.72),
+    0 0 42px rgba(24, 201, 90, 0.44),
+    inset 0 0 16px rgba(231, 255, 239, 0.24);
+  transform:
+    translate(calc(var(--gaze-x) + var(--eye-shift-x)), calc(var(--gaze-y) + var(--eye-shift-y)))
+    rotate(var(--eye-rotate))
+    scaleX(var(--eye-scale-x))
+    scaleY(var(--eye-scale-y));
+  transition:
+    width 180ms ease,
+    height 180ms ease,
+    transform 180ms ease,
+    border-radius 180ms ease,
+    opacity 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease;
+  animation: widgetBlink 6.2s ease-in-out infinite;
+}
+
+.widget-eye::after {
+  content: "";
+  position: absolute;
+  inset: 18% 18% 24%;
+  border-radius: inherit;
+  background:
+    linear-gradient(180deg, rgba(244, 255, 247, 0.88), rgba(244, 255, 247, 0) 62%),
+    linear-gradient(180deg, rgba(80, 255, 132, 0.2), rgba(80, 255, 132, 0) 100%);
+  opacity: 0.82;
+}
+
+.widget-eye-right {
+  animation-delay: 0.1s;
+}
+
+body[data-expression="curious"] .widget-eye-left {
+  --eye-shift-x: 6px;
+  --eye-rotate: -3deg;
+}
+
+body[data-expression="curious"] .widget-eye-right {
+  --eye-shift-x: 8px;
+  --eye-rotate: 3deg;
+}
+
+body[data-expression="happy"] .widget-eye-left {
+  --eye-rotate: -7deg;
+  --eye-scale-y: 0.84;
+  --eye-scale-x: 0.9;
+  --eye-shift-y: 4px;
+}
+
+body[data-expression="happy"] .widget-eye-right {
+  --eye-rotate: 7deg;
+  --eye-scale-y: 0.84;
+  --eye-scale-x: 0.9;
+  --eye-shift-y: 4px;
+}
+
+body[data-expression="thinking"] .widget-eye-left {
+  --eye-width: 34px;
+  --eye-height: 20px;
+  --eye-rotate: -4deg;
+}
+
+body[data-expression="thinking"] .widget-eye-right {
+  --eye-width: 20px;
+  --eye-height: 20px;
+  --eye-rotate: 7deg;
+  opacity: 0.84;
+}
+
+body[data-expression="listening"] .widget-eye {
+  --eye-height: 32px;
+  box-shadow:
+    0 0 16px rgba(160, 255, 194, 0.98),
+    0 0 30px rgba(91, 255, 144, 0.82),
+    0 0 54px rgba(32, 230, 93, 0.6);
+  animation:
+    widgetBlink 6.2s ease-in-out infinite,
+    listeningPulse 1.28s ease-in-out infinite;
+}
+
+body[data-expression="surprised"] .widget-eye {
+  --eye-width: 30px;
+  --eye-height: 30px;
+  border-radius: 9px;
+}
+
+body[data-expression="sleeping"] .widget-eye {
+  --eye-width: 28px;
+  --eye-height: 5px;
+  --eye-scale-x: 1.12;
+  background: linear-gradient(180deg, rgba(190, 255, 205, 0.94), rgba(46, 235, 107, 0.72));
+  border-radius: 999px;
+  box-shadow:
+    0 0 8px rgba(130, 255, 174, 0.52),
+    0 0 18px rgba(56, 239, 115, 0.28);
+  opacity: 0.84;
+  animation: none;
+}
+
+body[data-expression="waking"] .widget-eye {
+  animation: widgetWakeEyes 0.64s ease forwards;
+}
+
+body[data-expression="scanning"] .widget-shell-image {
+  animation: widgetShellScan 1.5s ease-in-out 1;
+}
+
+body[data-expression="scanning"] .widget-visor {
+  animation: widgetVisorSweep 1.5s ease-in-out 1;
+}
+
+.widget-hud {
+  display: none;
+}
+
+.widget-status {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9ce9ff;
+}
+
+.widget-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.widget-action {
+  flex: 1 1 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(124, 228, 255, 0.14);
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(19, 37, 63, 0.94), rgba(6, 14, 25, 0.94)),
+    radial-gradient(circle at 50% 0, rgba(105, 222, 255, 0.14), transparent 66%);
+  color: #e9fbff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.widget-action:hover,
+.widget-action:focus-visible {
+  transform: translateY(-1px);
+  border-color: rgba(149, 236, 255, 0.28);
+  box-shadow: 0 10px 22px rgba(20, 107, 163, 0.22);
+  outline: none;
+}
+
+.widget-action.danger {
+  color: #ffdede;
+  border-color: rgba(255, 149, 149, 0.18);
+  background:
+    linear-gradient(180deg, rgba(68, 19, 24, 0.94), rgba(26, 6, 10, 0.96)),
+    radial-gradient(circle at 50% 0, rgba(255, 139, 139, 0.16), transparent 68%);
+}
+
+.widget-tip {
+  margin: 10px 0 0;
+  color: rgba(214, 246, 255, 0.72);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+@keyframes widgetBlink {
+  0%,
+  44%,
+  48%,
+  80%,
+  84%,
+  100% {
+    opacity: 1;
+    transform:
+      translate(calc(var(--gaze-x) + var(--eye-shift-x)), calc(var(--gaze-y) + var(--eye-shift-y)))
+      rotate(var(--eye-rotate))
+      scaleX(var(--eye-scale-x))
+      scaleY(var(--eye-scale-y));
+  }
+  46%,
+  82% {
+    opacity: 0.78;
+    transform:
+      translate(calc(var(--gaze-x) + var(--eye-shift-x)), calc(var(--gaze-y) + var(--eye-shift-y)))
+      rotate(var(--eye-rotate))
+      scaleX(calc(var(--eye-scale-x) * 1.04))
+      scaleY(calc(var(--eye-scale-y) * 0.1));
+  }
+}
+
+@keyframes widgetWakeEyes {
+  0% {
+    opacity: 0.78;
+    transform: translate(var(--gaze-x), calc(var(--gaze-y) + 2px)) scaleX(1.18) scaleY(0.12);
+  }
+  52% {
+    opacity: 0.96;
+    transform: translate(var(--gaze-x), var(--gaze-y)) scaleX(1.04) scaleY(1.18);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(var(--gaze-x), var(--gaze-y)) scaleX(1) scaleY(1);
+  }
+}
+
+@keyframes widgetShellScan {
+  0%,
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  24% {
+    transform: translateX(-7px) rotate(-2.2deg);
+  }
+  56% {
+    transform: translateX(9px) rotate(2.5deg);
+  }
+  80% {
+    transform: translateX(-3px) rotate(-1deg);
+  }
+}
+
+@keyframes widgetVisorSweep {
+  0%,
+  100% {
+    transform: translate(-50%, -50%);
+  }
+  22% {
+    transform: translate(calc(-50% - 8px), calc(-50% - 2px));
+  }
+  54% {
+    transform: translate(calc(-50% + 10px), calc(-50% + 1px));
+  }
+  78% {
+    transform: translate(calc(-50% - 3px), calc(-50% + 2px));
+  }
+}
+
+@keyframes listeningPulse {
+  0%,
+  100% {
+    filter: brightness(1) saturate(1);
+  }
+  50% {
+    filter: brightness(1.16) saturate(1.08);
+  }
+}
+
+@keyframes widgetAuraPulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.94);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes visorBloom {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.08);
+  }
+}
